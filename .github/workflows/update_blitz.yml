@@ -1,0 +1,31 @@
+name: Update Lichess Elite SuperBlitz
+on:
+  schedule:
+    - cron: '05 19 * * 6' # Runs 19:05 UTC on Saturdays, elite superblitz ends at 19:00 UTC
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run Scraper
+        run: python scraper.py --type superblitz
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "Autopanda"
+          git config --global user.email "PurrfectPanda@users.noreply.github.com"
+          git add data/
+          git commit -m "Update superblitz high scores" || echo "No changes"
+          git push
