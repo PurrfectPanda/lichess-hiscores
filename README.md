@@ -2,7 +2,7 @@
 
 A data-driven historical archive for Lichess Elite Arena tournaments. This project scrapes, processes, and visualizes data from Elite Bullet and Elite SuperBlitz Arenas, providing deep insights into player performances and tournament history.
 
-[**View the Live Site**](https://olet.github.io/lichess-tournament-scores/)
+[**View the Live Site**](https://purrfectpanda.github.io/lichess-hiscores/)
 
 ---
 
@@ -68,8 +68,8 @@ The project is designed to be completely static and serverless, making it ideal 
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/olet/lichess-tournament-scores.git
-    cd lichess-tournament-scores
+    git clone https://github.com/purrfectpanda/lichess-hiscores.git
+    cd lichess-hiscores
     ```
 
 2.  **Install Frontend dependencies**:
