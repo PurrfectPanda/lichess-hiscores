@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Search, ExternalLink, ArrowLeft, Sun, Moon } from 'lucide-react';
+import { Search, ExternalLink, ArrowLeft, Sun, Moon, Filter, ListRestart } from 'lucide-react';
 import { StatsFile, PlayerStats, TournamentData } from './types';
 import './App.css';
 
@@ -88,40 +88,86 @@ const ViewTabs = () => {
 // --- VIEWS ---
 
 const RecordsView = ({ stats, category }: { stats: StatsFile | null, category: string }) => {
+  const [collapsed, setCollapsed] = useState(true);
+  
   if (!stats) return <div className="app-container">Loading stats...</div>;
 
   const currentRecords = stats[category as keyof StatsFile].records;
   const formatKey = (key: string) => key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
+  const getDisplayEntries = (key: string, entries: any[]) => {
+    if (!collapsed || !['highest_score', 'longest_win_streak'].includes(key)) {
+      return entries.slice(0, 10).map(e => ({ ...e, extra: [] }));
+    }
+
+    const seen = new Map<string, any>();
+    const result: any[] = [];
+
+    for (const entry of entries) {
+      if (!seen.has(entry.player)) {
+        if (result.length < 10) {
+          const newEntry = { ...entry, extra: [] };
+          seen.set(entry.player, newEntry);
+          result.push(newEntry);
+        }
+      } else {
+        seen.get(entry.player).extra.push(entry);
+      }
+    }
+    return result;
+  };
+
   return (
     <main className="app-container">
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+        <button 
+          className={`tab ${collapsed ? 'active' : ''}`} 
+          onClick={() => setCollapsed(!collapsed)}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}
+        >
+          {collapsed ? <Filter size={16} /> : <ListRestart size={16} />}
+          {collapsed ? 'Unique Players Only' : 'Show All Entries'}
+        </button>
+      </div>
       <div className="stats-grid">
-        {Object.entries(currentRecords).map(([key, entries]) => (
-          <div key={key} className="card">
-            <h2>{formatKey(key)}</h2>
-            <table>
-              <tbody>
-                {entries.slice(0, 10).map((entry, i) => (
-                  <tr key={i}>
-                    <td className={`rank rank-${i+1}`}>{i + 1}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        {entry.title && <span className="player-title">{entry.title}</span>}
-                        <Link to={`/player/${category}/${entry.player}`} className="username">{entry.player}</Link>
-                      </div>
-                    </td>
-                    <td className="value">
-                      {entry.value}
-                      <Link to={`/tournament/${category}/${entry.tournament}`} title="View Tournament" style={{ marginLeft: '0.5rem', opacity: 0.5 }}>
-                        <ExternalLink size={12} />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ))}
+        {Object.entries(currentRecords).map(([key, rawEntries]) => {
+          const entries = getDisplayEntries(key, rawEntries);
+          return (
+            <div key={key} className="card">
+              <h2>{formatKey(key)}</h2>
+              <table>
+                <tbody>
+                  {entries.map((entry, i) => (
+                    <tr key={i}>
+                      <td className={`rank rank-${i+1}`}>{i + 1}</td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          {entry.title && <span className="player-title">{entry.title}</span>}
+                          <Link to={`/player/${category}/${entry.player}`} className="username">{entry.player}</Link>
+                          {entry.extra && entry.extra.length > 0 && (
+                            <span 
+                              className="badge" 
+                              title={`Other records: ${entry.extra.map((e: any) => `${e.value} (@${e.tournament})`).join(', ')}`}
+                              style={{ fontSize: '0.7rem', opacity: 0.6, cursor: 'help' }}
+                            >
+                              +{entry.extra.length}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="value">
+                        {entry.value}
+                        <Link to={`/tournament/${category}/${entry.tournament}`} title="View Tournament" style={{ marginLeft: '0.5rem', opacity: 0.5 }}>
+                          <ExternalLink size={12} />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
       </div>
     </main>
   );
