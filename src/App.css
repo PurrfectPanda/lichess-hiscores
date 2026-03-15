@@ -202,9 +202,16 @@ tr:hover td {
 .username {
   font-weight: 600;
   color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 150px;
+  vertical-align: bottom;
 }
 
 .player-title {
+  flex-shrink: 0;
   background-color: var(--gold);
   color: #000;
   font-size: 0.7rem;
@@ -223,6 +230,10 @@ tr:hover td {
   text-align: right;
   font-family: monospace;
   font-size: 1.1rem;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .tabs {
@@ -250,11 +261,14 @@ tr:hover td {
   justify-content: space-between;
   align-items: flex-end;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
 .player-name h1 {
   font-size: 2.5rem;
   color: var(--text-bright);
+  word-break: break-all;
 }
 
 .player-meta-grid {

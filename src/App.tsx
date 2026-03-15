@@ -163,10 +163,11 @@ const RecordsView = ({ stats, category }: { stats: StatsFile | null, category: s
                     <tr key={i}>
                       <td className={`rank rank-${i+1}`}>{i + 1}</td>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
                           {entry.title && <span className="player-title">{entry.title}</span>}
                           <Link to={`/player/${category}/${entry.player}`} className="username">{entry.player}</Link>
                           {entry.extra && entry.extra.length > 0 && (
+
                             <span 
                               className="badge" 
                               title={`Other records: ${entry.extra.map((e: any) => `${e.value} (@${e.tournament})`).join(', ')}`}
@@ -178,10 +179,12 @@ const RecordsView = ({ stats, category }: { stats: StatsFile | null, category: s
                         </div>
                       </td>
                       <td className="value">
-                        {entry.value}
-                        <Link to={`/tournament/${category}/${entry.tournament}`} title="View Tournament" style={{ marginLeft: '0.5rem', opacity: 0.5 }}>
-                          <ExternalLink size={12} />
-                        </Link>
+                        {entry.value.toLocaleString()}
+                        {entry.tournament && (
+                          <Link to={`/tournament/${category}/${entry.tournament}`} title="View Tournament" style={{ marginLeft: '0.5rem', opacity: 0.5, display: 'inline-flex' }}>
+                            <ExternalLink size={12} />
+                          </Link>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -363,13 +366,13 @@ const TournamentView = () => {
               <tr key={r.username}>
                 <td className={`rank rank-${r.rank}`}>{r.rank}</td>
                 <td className="username">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
                     {r.title && <span className="player-title">{r.title}</span>}
-                    <Link to={`/player/${data.meta.fullName.includes('Bullet') ? 'bullet' : 'superblitz'}/${r.username}`}>{r.username}</Link>
+                    <Link to={`/player/${data.meta.fullName.includes('Bullet') ? 'bullet' : 'superblitz'}/${r.username}`} className="username">{r.username}</Link>
                   </div>
                 </td>
                 <td>{r.rating}</td>
-                <td className="value">{r.score}</td>
+                <td className="value">{r.score.toLocaleString()}</td>
                 <td>{r.performance}</td>
               </tr>
             ))}
