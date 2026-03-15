@@ -10,12 +10,14 @@ A data-driven historical archive for Lichess Elite Arena tournaments. This proje
 
 ### 🌍 Global Records
 Track all-time records across all archived tournaments (top 100 for each):
+- **Filtering**: Toggle between showing all entries or collapsing multiple records for the same player (showing personal bests with hoverable tooltips for other entries).
 - **Performance**: Highest score, highest score per game, and best performance.
 - **Activity**: Most games played, most total moves, and most total wins.
 - **Consistency**: Longest win streaks and most tournament wins.
 
 ### 👤 Player Profiles
 Detailed historical statistics for any player who has ever participated in an Elite Arena:
+- **Identity**: Official Lichess titles (GM, IM, FM, etc.) displayed across all views.
 - **Personal Bests**: Highest rank achieved, highest score, and best performance.
 - **Career Totals**: Total games, moves, wins, and tournaments played.
 - **Playstyle**: Average Berserk rate and longest individual win streaks.
@@ -40,7 +42,7 @@ Explore the specifics of every archived tournament:
 ### Data Processing & Automation
 - **Scraper**: Python (Requests, BeautifulSoup4)
 - **API**: [Lichess API](https://lichess.org/api) (NDJSON streams for games and results)
-- **Automation**: GitHub Actions (Scheduled daily updates)
+- **Automation**: GitHub Actions (Weekly updates synchronized with tournament schedules)
 - **Storage**: Flat JSON files in the `data/` directory (static-site friendly)
 
 ---
@@ -51,9 +53,9 @@ The project is designed to be completely static and serverless, making it ideal 
 
 1.  **Scraping**: A Python script (`scraper.py`) fetches tournament IDs from Lichess history and downloads detailed results/games for each.
 2.  **Processing**: The script aggregates this raw data into:
-    -   `data/stats.json`: Global records and metadata.
-    -   `data/tournaments/*.json`: Detailed data for individual tournaments.
-    -   `data/players/*/*.json`: Historical stats for individual players.
+    -   `data/[category]/stats.json`: Global records and metadata for each category.
+    -   `data/[category]/tournaments/*.json`: Detailed data for individual tournaments.
+    -   `data/[category]/players/*.json`: Historical stats for individual players.
 3.  **Visualization**: The React frontend fetches these JSON files directly to render the UI.
 
 ---
@@ -89,7 +91,7 @@ The project is designed to be completely static and serverless, making it ideal 
 
 ## 📅 Maintenance
 
-The data is automatically updated every day at midnight (UTC) via GitHub Actions. You can also manually trigger an update from the **Actions** tab in the repository.
+The data is automatically updated every Saturday at 19:05 UTC via GitHub Actions, synchronized with the conclusion of the weekly Elite Arena tournaments. You can also manually trigger an update from the **Actions** tab in the repository.
 
 ---
 
