@@ -1,20 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Trophy, User, Calendar, ExternalLink, ArrowLeft, Swords } from 'lucide-react';
-import { StatsFile, RecordEntry, PlayerStats, TournamentData, TournamentSummary } from './types';
+import { Search, ExternalLink, ArrowLeft, Sun, Moon } from 'lucide-react';
+import { StatsFile, PlayerStats, TournamentData } from './types';
 import './App.css';
 
-const API_BASE = '/data';
+const API_BASE = (import.meta.env.BASE_URL || '/') + 'data';
 
-// --- COMPONENTS ---
+// ... COMPONENTS ...
 
-const Navigation = ({ players, category, setCategory }: { players: string[], category: string, setCategory: (c: string) => void }) => {
+const Navigation = ({ 
+  players, 
+  category, 
+  setCategory,
+  theme,
+  toggleTheme 
+}: { 
+  players: { username: string; title?: string }[], 
+  category: string, 
+  setCategory: (c: string) => void,
+  theme: string,
+  toggleTheme: () => void
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
-  const location = useLocation();
 
   const filteredPlayers = searchTerm 
-    ? players.filter(p => p.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 10)
+    ? players.filter(p => p.username.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 10)
     : [];
 
   return (
@@ -22,7 +33,7 @@ const Navigation = ({ players, category, setCategory }: { players: string[], cat
       <Link to="/" className="logo">Lichess<span>Elite</span>Archive</Link>
       
       <div className="search-bar">
-        <Search size={18} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#666' }} />
+        <Search size={18} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-color)' }} />
         <input 
           type="text" 
           placeholder="Search players..." 
@@ -32,22 +43,29 @@ const Navigation = ({ players, category, setCategory }: { players: string[], cat
         {filteredPlayers.length > 0 && (
           <div className="search-results">
             {filteredPlayers.map(p => (
-              <div key={p} className="search-item" onClick={() => {
-                navigate(`/player/${category}/${p}`);
+              <div key={p.username} className="search-item" onClick={() => {
+                navigate(`/player/${category}/${p.username}`);
                 setSearchTerm('');
               }}>
-                {p}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  {p.title && <span className="player-title">{p.title}</span>}
+                  {p.username}
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      <nav>
+      <nav style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
         <div className="tabs" style={{ marginBottom: 0 }}>
           <button className={`tab ${category === 'bullet' ? 'active' : ''}`} onClick={() => setCategory('bullet')}>Bullet</button>
           <button className={`tab ${category === 'superblitz' ? 'active' : ''}`} onClick={() => setCategory('superblitz')}>SuperBlitz</button>
         </div>
+        
+        <button className="theme-toggle" onClick={toggleTheme} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
       </nav>
     </header>
   );
@@ -87,7 +105,10 @@ const RecordsView = ({ stats, category }: { stats: StatsFile | null, category: s
                   <tr key={i}>
                     <td className={`rank rank-${i+1}`}>{i + 1}</td>
                     <td>
-                      <Link to={`/player/${category}/${entry.player}`} className="username">{entry.player}</Link>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        {entry.title && <span className="player-title">{entry.title}</span>}
+                        <Link to={`/player/${category}/${entry.player}`} className="username">{entry.player}</Link>
+                      </div>
                     </td>
                     <td className="value">
                       {entry.value}
@@ -157,7 +178,10 @@ const PlayerView = ({ category: defaultCategory }: { category: string }) => {
     <main className="app-container">
       <div className="player-header">
         <div className="player-name">
-          <h1>{username}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            {data.title && <span className="player-title large">{data.title}</span>}
+            <h1>{username}</h1>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{ color: 'var(--gold)', fontWeight: 600 }}>{activeCat.toUpperCase()} ELITE PLAYER</div>
             <a href={`https://lichess.org/@/${username}`} target="_blank" rel="noopener noreferrer" className="tab" style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -269,7 +293,10 @@ const TournamentView = () => {
               <tr key={r.username}>
                 <td className={`rank rank-${r.rank}`}>{r.rank}</td>
                 <td className="username">
-                   <Link to={`/player/${data.meta.fullName.includes('Bullet') ? 'bullet' : 'superblitz'}/${r.username}`}>{r.username}</Link>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    {r.title && <span className="player-title">{r.title}</span>}
+                    <Link to={`/player/${data.meta.fullName.includes('Bullet') ? 'bullet' : 'superblitz'}/${r.username}`}>{r.username}</Link>
+                  </div>
                 </td>
                 <td>{r.rating}</td>
                 <td className="value">{r.score}</td>
@@ -288,6 +315,20 @@ const TournamentView = () => {
 const App = () => {
   const [stats, setStats] = useState<StatsFile | null>(null);
   const [category, setCategory] = useState('bullet');
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   useEffect(() => {
     fetch(`${API_BASE}/${category}/stats.json`)
@@ -304,8 +345,14 @@ const App = () => {
   const playerList = stats && stats[category as keyof StatsFile] ? stats[category as keyof StatsFile].player_list : [];
 
   return (
-    <Router>
-      <Navigation players={playerList} category={category} setCategory={setCategory} />
+    <Router basename={import.meta.env.BASE_URL}>
+      <Navigation 
+        players={playerList} 
+        category={category} 
+        setCategory={setCategory} 
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
       <ViewTabs />
       <Routes>
         <Route path="/" element={<RecordsView stats={stats} category={category} />} />

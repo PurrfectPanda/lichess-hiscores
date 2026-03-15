@@ -2,9 +2,11 @@ export interface RecordEntry {
   value: number;
   player: string;
   tournament: string;
+  title?: string;
 }
 
 export interface PlayerStats {
+  title?: string;
   highest_score: number;
   highest_rank: number;
   total_tournaments: number;
@@ -34,6 +36,7 @@ export interface TournamentMeta {
 export interface TournamentStanding {
   rank: number;
   username: string;
+  title?: string;
   score: number;
   rating: number;
   performance: number;
@@ -59,7 +62,7 @@ export interface TournamentSummary {
 }
 
 export interface CategoryStats {
-  player_list: string[];
+  player_list: { username: string; title?: string }[];
   tournament_list: TournamentSummary[];
   records: Record<string, RecordEntry[]>;
 }

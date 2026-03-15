@@ -170,6 +170,7 @@ def aggregate_data(cat):
             name = r['username']
             if name not in player_index:
                 player_index[name] = {
+                    "title": r.get('title'),
                     "highest_score": 0, "highest_rank": 9999, "total_tournaments": 0,
                     "total_games": 0, "total_moves": 0, "total_wins": 0, "total_berserks": 0,
                     "highest_performance": 0, "tournament_wins": 0, "total_score": 0,
@@ -177,6 +178,9 @@ def aggregate_data(cat):
                 }
             
             p = player_index[name]
+            if not p.get('title') and r.get('title'):
+                p['title'] = r.get('title')
+                
             p["total_tournaments"] += 1
             p["highest_score"] = max(p["highest_score"], r['score'])
             p["total_score"] += r['score']
@@ -192,10 +196,10 @@ def aggregate_data(cat):
                 p["total_berserks"] += ps['berserks']
                 p["highest_win_streak"] = max(p["highest_win_streak"], ps['best_streak'])
                 
-                all_single_scores.append({"value": r['score'], "player": name, "tournament": t_id})
+                all_single_scores.append({"value": r['score'], "player": name, "tournament": t_id, "title": p.get('title')})
                 if ps['games'] > 0:
-                    all_single_spg.append({"value": round(r['score'] / ps['games'], 2), "player": name, "tournament": t_id})
-                all_single_streaks.append({"value": ps['best_streak'], "player": name, "tournament": t_id})
+                    all_single_spg.append({"value": round(r['score'] / ps['games'], 2), "player": name, "tournament": t_id, "title": p.get('title')})
+                all_single_streaks.append({"value": ps['best_streak'], "player": name, "tournament": t_id, "title": p.get('title')})
 
     # Build Top 100 Records and save individual players
     for name, p in player_index.items():
@@ -207,7 +211,7 @@ def aggregate_data(cat):
         with open(f"{cat_player_dir}/{name}.json", "w") as f:
             json.dump(p, f)
         
-        cat_stats["player_list"].append(name)
+        cat_stats["player_list"].append({"username": name, "title": p.get('title')})
 
     recs = cat_stats["records"]
     
@@ -217,11 +221,11 @@ def aggregate_data(cat):
     recs["highest_score"] = get_top(all_single_scores)
     recs["highest_score_per_game"] = get_top(all_single_spg)
     recs["longest_win_streak"] = get_top(all_single_streaks)
-    recs["most_tournament_wins"] = get_top([{"value": v['tournament_wins'], "player": k} for k, v in player_index.items()])
-    recs["most_games_played"] = get_top([{"value": v['total_games'], "player": k} for k, v in player_index.items()])
-    recs["most_games_won"] = get_top([{"value": v['total_wins'], "player": k} for k, v in player_index.items()])
-    recs["highest_total_score"] = get_top([{"value": v['total_score'], "player": k} for k, v in player_index.items()])
-    recs["most_total_moves_played"] = get_top([{"value": v['total_moves'], "player": k} for k, v in player_index.items()])
+    recs["most_tournament_wins"] = get_top([{"value": v['tournament_wins'], "player": k, "title": v.get('title')} for k, v in player_index.items()])
+    recs["most_games_played"] = get_top([{"value": v['total_games'], "player": k, "title": v.get('title')} for k, v in player_index.items()])
+    recs["most_games_won"] = get_top([{"value": v['total_wins'], "player": k, "title": v.get('title')} for k, v in player_index.items()])
+    recs["highest_total_score"] = get_top([{"value": v['total_score'], "player": k, "title": v.get('title')} for k, v in player_index.items()])
+    recs["most_total_moves_played"] = get_top([{"value": v['total_moves'], "player": k, "title": v.get('title')} for k, v in player_index.items()])
 
     with open(f"{cat_dir}/stats.json", "w") as f:
         json.dump(cat_stats, f)
