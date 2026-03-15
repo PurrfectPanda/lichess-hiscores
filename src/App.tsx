@@ -24,6 +24,10 @@ const Navigation = ({
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
+  useEffect(() => {
+    setSearchTerm('');
+  }, [category]);
+
   const filteredPlayers = searchTerm 
     ? players.filter(p => p.username.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 10)
     : [];
@@ -59,8 +63,24 @@ const Navigation = ({
 
       <nav style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
         <div className="tabs" style={{ marginBottom: 0 }}>
-          <button className={`tab ${category === 'bullet' ? 'active' : ''}`} onClick={() => setCategory('bullet')}>Bullet</button>
-          <button className={`tab ${category === 'superblitz' ? 'active' : ''}`} onClick={() => setCategory('superblitz')}>SuperBlitz</button>
+          <button 
+            className={`tab ${category === 'bullet' ? 'active' : ''}`} 
+            onClick={() => {
+              setCategory('bullet');
+              navigate('/');
+            }}
+          >
+            Bullet
+          </button>
+          <button 
+            className={`tab ${category === 'superblitz' ? 'active' : ''}`} 
+            onClick={() => {
+              setCategory('superblitz');
+              navigate('/');
+            }}
+          >
+            SuperBlitz
+          </button>
         </div>
         
         <button className="theme-toggle" onClick={toggleTheme} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
@@ -90,7 +110,9 @@ const ViewTabs = () => {
 const RecordsView = ({ stats, category }: { stats: StatsFile | null, category: string }) => {
   const [collapsed, setCollapsed] = useState(true);
   
-  if (!stats) return <div className="app-container">Loading stats...</div>;
+  if (!stats || !stats[category as keyof StatsFile]?.records) {
+    return <div className="app-container">Loading {category} stats...</div>;
+  }
 
   const currentRecords = stats[category as keyof StatsFile].records;
   const formatKey = (key: string) => key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -174,7 +196,9 @@ const RecordsView = ({ stats, category }: { stats: StatsFile | null, category: s
 };
 
 const TournamentListView = ({ stats, category }: { stats: StatsFile | null, category: string }) => {
-  if (!stats) return <div className="app-container">Loading tournaments...</div>;
+  if (!stats || !stats[category as keyof StatsFile]?.tournament_list) {
+    return <div className="app-container">Loading {category} tournaments...</div>;
+  }
   const list = stats[category as keyof StatsFile].tournament_list;
 
   return (
