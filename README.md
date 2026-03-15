@@ -91,7 +91,11 @@ The project is designed to be completely static and serverless, making it ideal 
 
 ## 📅 Maintenance
 
-The data is automatically updated every Saturday at 19:05 UTC via GitHub Actions, synchronized with the conclusion of the weekly Elite Arena tournaments. You can also manually trigger an update from the **Actions** tab in the repository.
+The data is automatically updated via GitHub Actions, synchronized with the conclusion of the weekly Elite Arena tournaments:
+- **Elite Bullet**: Sundays at 18:35 UTC.
+- **Elite SuperBlitz**: Saturdays at 19:05 UTC.
+
+You can also manually trigger an update from the **Actions** tab in the repository.
 
 ---
 
